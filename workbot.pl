@@ -54,10 +54,10 @@ sub _build_geoip {
 }
 
 sub geo_lookup {
+    warn Data::Dumper->Dumper($self->geoip);
     my ($self, $ip) = @_;
     my $default = 'Not found.';
     my $record = $self->geoip->record_by_addr($ip);
-    warn $record;
     if ( defined $record ) {
         my $msg = do {
             my @location;
