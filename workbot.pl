@@ -57,6 +57,7 @@ sub geo_lookup {
     my ($self, $ip) = @_;
     my $default = 'Not found.';
     my $record = $self->geoip->record_by_addr($ip);
+    warn $record;
     if ( defined $record ) {
         my $msg = do {
             my @location;
