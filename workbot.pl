@@ -7,7 +7,7 @@ use Carp qw(carp);
 use namespace::autoclean;
 use feature 'switch';
 
-owner    'goldfish!goldfish@Redbrick.dcu.ie';
+owner    'go|dfish!goldfish@Redbrick.dcu.ie';
 nickname 'morry';
 server   'irc.redbrick.dcu.ie';
 channels '#moses';
