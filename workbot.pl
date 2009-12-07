@@ -2,8 +2,10 @@
 
 package Workbot;
 use Moses;
+use Geo::IP;
 use Carp qw(carp);
 use namespace::autoclean;
+use Regexp::Common qw(net);
 use feature 'switch';
 
 owner    'go|dfish!goldfish@Redbrick.dcu.ie';
@@ -27,8 +29,7 @@ has admins => (
 );
 
 sub set_admin {
-    my $self = shift;
-    my ($admin_ref) = @_;
+    my ($self, $admin_ref) = @_;
     my ($admin_key, $admin_val) = each %$admin_ref;
     if ($admin_key !~ /^[^!]+![^@]+\@([^.]+\.)+[^.]+$/){ 
         carp "$admin_key is not a valid key";
@@ -38,8 +39,37 @@ sub set_admin {
 }
 
 sub dump_admins {
-    my $self = shift;
+    my ($self) = @_;
     $self->has_no_admins ? 'no admins.' : join ' ', $self->_dump_admins
+}
+
+has geoip => (
+    isa => 'Geo::IP',
+    is  => 'ro',
+    lazy_build => 1
+    );
+
+sub _build_geoip {
+    Geo::IP->open('/home/associat/g/goldfish/local/share/GeoIP/GeoLiteCity.dat')
+}
+
+sub geo_lookup {
+    my ($self, $ip) = @_;
+    my $default = 'Not found.';
+    my $record = $self->geoip->record_by_addr($ip);
+    if ( defined $record ) {
+        my $msg = do {
+            my @location;
+            for ( qw( city region_name country_name ) ) {
+                if ( defined $record->$_ and $record->$_ ) {
+                    push @location, $record->$_
+                } else { push @location, 'Unknown' }
+            }
+            $ip . ' => ' . join ' - ', @location
+        };
+        $default = $msg if defined $msg;
+     }
+    return $default
 }
 
 event irc_bot_addressed => sub {
@@ -61,6 +91,9 @@ event irc_bot_addressed => sub {
         when ($_ eq 'dump') {
             break unless $bot->default_owner eq $nickstr;
             $bot->privmsg($channel => "$nick: " . $bot->dump_admins)
+        }
+        when (/^$RE{net}{IPv4}$/) {
+            $bot->privmsg($channel => "$nick: " . $bot->geo_lookup(@args))
         }
     }
 };
