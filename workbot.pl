@@ -50,20 +50,12 @@ event irc_bot_addressed => sub {
     given ($cmd) {
         when ($_ eq 'add' or $_ eq 'del') {
             break unless $bot->default_owner eq $nickstr;
-            my $nicklist = $bot->irc->{STATE}{Nicks};
             foreach my $arg (@args) {
-                warn $bot->irc->nick_long_form($arg);
-                foreach (keys %$nicklist) {
-                    my $user = $nicklist->{$_};
-# TODO : better variable name than $user
-                    if ($user->{Nick} eq $arg) {
-                        my $admin = $user->{Nick} . '!' . $user->{User} . '@' . $user->{Host};
-# TODO : better variable name than $key
-                        $cmd eq 'add' 
-                            ? $bot->set_admin({$admin => 1})
-                            : $bot->del_admin($admin);
-                        last
-                    }
+                my $key = $bot->irc->nick_long_form($arg);
+                if ($key) {
+                    $cmd eq 'add' 
+                        ? $bot->set_admin({$key => 1})
+                        : $bot->del_admin($key);
                 }
             }
         }
