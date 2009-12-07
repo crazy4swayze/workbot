@@ -2,6 +2,7 @@
 
 package Workbot;
 use Moses;
+use POE::Component::IRC::State qw(nick_long_form);
 use Carp qw(carp);
 use namespace::autoclean;
 use feature 'switch';
@@ -12,9 +13,9 @@ server   'irc.redbrick.dcu.ie';
 channels '#moses';
 
 has admins => (
-    isa => 'HashRef',
-    is  => 'ro',
-    traits => [qw(Hash)],
+    isa     => 'HashRef',
+    is      => 'ro',
+    traits  => [qw(Hash)],
     default => sub { {} },
     handles => {
         get_admin     => 'get',
@@ -52,6 +53,7 @@ event irc_bot_addressed => sub {
             break unless $bot->default_owner eq $nickstr;
             my $nicklist = $bot->irc->{STATE}{Nicks};
             foreach my $arg (@args) {
+                warn nick_long_form($arg);
                 foreach (keys %$nicklist) {
                     my $user = $nicklist->{$_};
 # TODO : better variable name than $user
