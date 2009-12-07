@@ -52,11 +52,10 @@ event irc_bot_addressed => sub {
             break unless $bot->default_owner eq $nickstr;
             foreach my $arg (@args) {
                 my $key = $bot->irc->nick_long_form($arg);
-                if ($key) {
-                    $cmd eq 'add' 
-                        ? $bot->set_admin({$key => 1})
-                        : $bot->del_admin($key);
-                }
+                next unless $key;
+                $cmd eq 'add' 
+                    ? $bot->set_admin({$key => 1})
+                    : $bot->del_admin($key);
             }
         }
         when ($_ eq 'dump') {
