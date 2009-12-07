@@ -39,7 +39,7 @@ sub set_admin {
 
 sub dump_admins {
     my $self = shift;
-    $self->has_no_admins ? 'no admins.' : $self->_dump_admins
+    $self->has_no_admins ? 'no admins.' : join ' ', $self->_dump_admins
 }
 
 event irc_bot_addressed => sub {
