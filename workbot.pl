@@ -2,6 +2,7 @@
 
 package Workbot;
 use Moses;
+use Data::Dumper;
 use Geo::IP;
 use Carp qw(carp);
 use namespace::autoclean;
@@ -47,15 +48,15 @@ has geoip => (
     isa => 'Geo::IP',
     is  => 'ro',
     lazy_build => 1
-    );
+);
 
 sub _build_geoip {
-    Geo::IP->open('/home/associat/g/goldfish/local/share/GeoIP/GeoLiteCity.dat')
+    Geo::IP->open('/home/associat/g/goldfish/local/share/GeoIP/GeoLiteCity.dat', GEOIP_STANDARD)
 }
 
 sub geo_lookup {
-    warn Data::Dumper->Dumper($self->geoip);
     my ($self, $ip) = @_;
+#    warn Data::Dumper->Dumper($self->geoip);
     my $default = 'Not found.';
     my $record = $self->geoip->record_by_addr($ip);
     if ( defined $record ) {
@@ -94,7 +95,8 @@ event irc_bot_addressed => sub {
             $bot->privmsg($channel => "$nick: " . $bot->dump_admins)
         }
         when (/^$RE{net}{IPv4}$/) {
-            $bot->privmsg($channel => "$nick: " . $bot->geo_lookup(@args))
+# there are no @args, ip address is contained in $cmd
+            $bot->privmsg($channel => $bot->geo_lookup($cmd))
         }
     }
 };
