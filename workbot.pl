@@ -21,23 +21,13 @@ has admins => (
     default => sub { {} },
     handles => {
         get_admin     => 'get',
-        _set_admin    => 'set',
+        set_admin     => 'set',
         is_admin      => 'exists',
         has_no_admins => 'is_empty',
         del_admin     => 'delete',
         _dump_admins  => 'keys',
     }
 );
-
-sub set_admin {
-    my ($self, $admin_ref) = @_;
-    my ($admin_key, $admin_val) = each %$admin_ref;
-    if ($admin_key !~ /^[^!]+![^@]+\@([^.]+\.)+[^.]+$/){ 
-        carp "$admin_key is not a valid key";
-        return
-    }
-    $self->_set_admin($admin_key => $admin_val)
-}
 
 sub dump_admins {
     my ($self) = @_;
@@ -96,6 +86,8 @@ event irc_bot_addressed => sub {
         }
         when (/^$RE{net}{IPv4}$/) {
 # there are no @args, ip address is contained in $cmd
+# we dont want to respond to 'nick: ' with this as
+# it looks stupid
             $bot->privmsg($channel => $bot->geo_lookup($cmd))
         }
     }
